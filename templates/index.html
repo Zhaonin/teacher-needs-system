@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分学科教师需求填写系统</title>
+<style>
+  :root {
+    --primary: #2c5f8a;
+    --primary-light: #e8f0f8;
+    --border: #d0d7de;
+    --bg: #f5f7fa;
+    --card-bg: #ffffff;
+    --text: #333;
+    --text-secondary: #666;
+    --danger: #d9534f;
+    --danger-hover: #c9302c;
+    --success: #5cb85c;
+    --radius: 8px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ===== 头部 ===== */
+  .header {
+    background: linear-gradient(135deg, #1a3a5c 0%, #2c5f8a 100%);
+    color: #fff;
+    padding: 24px 0;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  .header h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: 1px; }
+  .header p { font-size: 0.9rem; opacity: 0.85; margin-top: 4px; }
+
+  /* ===== 容器 ===== */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px 16px;
+  }
+
+  /* ===== 表单卡片 ===== */
+  .form-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+  }
+  .form-card h2 {
+    font-size: 1.2rem;
+    color: var(--primary);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .form-card h2::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 20px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+
+  /* ===== 基本信息行 ===== */
+  .info-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .info-row .field {
+    flex: 1;
+    min-width: 180px;
+  }
+  .field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+  .field input,
+  .field select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fff;
+  }
+  .field input:focus,
+  .field select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.12);
+  }
+
+  /* ===== 分类区块 ===== */
+  .category-section {
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .category-title {
+    background: var(--primary-light);
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .category-title .icon { font-size: 1.1rem; }
+  .tag-list {
+    padding: 8px 0;
+  }
+  .tag-item {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 0;
+  }
+  .tag-item:last-child { border-bottom: none; }
+  .tag-label {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .tag-label:hover { background: #fafbfc; }
+  .tag-label input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    margin-right: 10px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .tag-label .tag-text { flex: 1; }
+
+  /* 描述框 */
+  .tag-desc {
+    display: none;
+    padding: 0 16px 12px 43px;
+  }
+  .tag-desc textarea {
+    width: 100%;
+    min-height: 70px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    resize: vertical;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .tag-desc textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.08);
+  }
+  .tag-desc textarea::placeholder { color: #bbb; }
+
+  /* ===== 提交按钮 ===== */
+  .btn-row { text-align: center; margin-top: 8px; }
+  .btn-submit {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 12px 48px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-submit:hover { background: #1e4d73; }
+  .btn-submit:active { transform: scale(0.98); }
+  .btn-submit:disabled {
+    background: #a0b8cc;
+    cursor: not-allowed;
+  }
+
+  /* ===== 消息提示 ===== */
+  .toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    padding: 12px 28px;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 600;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    font-size: 0.9rem;
+  }
+  .toast.show { opacity: 1; }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+
+  /* ===== 展示区 ===== */
+  .display-section h2 {
+    font-size: 1.2rem;
+    color: var(--primary);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .display-section h2::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 20px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: #aaa;
+    font-size: 0.95rem;
+  }
+  .empty-state .icon { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+  /* ===== 需求卡片 ===== */
+  .card-grid {
+    display: grid;
+    gap: 16px;
+  }
+  .need-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .need-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.1); }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #fafbfc;
+    border-bottom: 1px solid #f0f0f0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .card-header .teacher-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .card-header .name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--primary);
+  }
+  .card-header .subject {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .card-header .time {
+    color: #999;
+    font-size: 0.8rem;
+  }
+  .btn-delete {
+    background: none;
+    border: 1px solid #e0d0d0;
+    color: #c55;
+    padding: 4px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-delete:hover {
+    background: var(--danger);
+    color: #fff;
+    border-color: var(--danger);
+  }
+  .card-body { padding: 16px 20px; }
+  .item-group { margin-bottom: 12px; }
+  .item-group:last-child { margin-bottom: 0; }
+  .item-group .group-label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .item-group .group-label::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--primary);
+    border-radius: 50%;
+  }
+  .item-entry {
+    padding: 6px 0 6px 16px;
+    font-size: 0.88rem;
+    border-left: 2px solid #e8f0f8;
+    margin-left: 2px;
+  }
+  .item-entry .tag-name {
+    font-weight: 600;
+    color: #444;
+  }
+  .item-entry .desc {
+    margin-top: 3px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ===== 确认弹窗 ===== */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 9998;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .overlay.show { display: flex; }
+  .dialog {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 28px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+  }
+  .dialog p { margin-bottom: 20px; font-size: 0.95rem; color: #555; }
+  .dialog .dialog-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .dialog .btn-cancel {
+    background: #eee;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .dialog .btn-confirm {
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 640px) {
+    .header h1 { font-size: 1.35rem; }
+    .header p { font-size: 0.8rem; }
+    .container { padding: 12px 10px; }
+    .form-card { padding: 16px; }
+    .info-row { flex-direction: column; gap: 10px; }
+    .info-row .field { min-width: 100%; }
+    .card-header { flex-direction: column; align-items: flex-start; }
+    .btn-submit { width: 100%; padding: 12px 20px; }
+    .tag-label { padding: 10px 12px; }
+    .tag-desc { padding: 0 12px 10px 39px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 头部 -->
+<div class="header">
+  <h1>分学科教师需求填写系统</h1>
+  <p>教研总结 · 教师个人需求调研</p>
+</div>
+
+<!-- 主体容器 -->
+<div class="container">
+
+  <!-- 表单区域 -->
+  <div class="form-card">
+    <h2>需求填写</h2>
+
+    <!-- 基本信息 -->
+    <div class="info-row">
+      <div class="field">
+        <label for="teacherName">教师姓名 <span style="color:var(--danger)">*</span></label>
+        <input type="text" id="teacherName" placeholder="请输入姓名" maxlength="20">
+      </div>
+      <div class="field">
+        <label for="teacherSubject">所属学科 <span style="color:var(--danger)">*</span></label>
+        <select id="teacherSubject">
+          <option value="">请选择学科</option>
+          <option value="语文">语文</option>
+          <option value="数学">数学</option>
+          <option value="英语">英语</option>
+          <option value="物理">物理</option>
+          <option value="化学">化学</option>
+          <option value="生物">生物</option>
+          <option value="历史">历史</option>
+          <option value="地理">地理</option>
+          <option value="政治">政治</option>
+          <option value="音乐">音乐</option>
+          <option value="体育">体育</option>
+          <option value="美术">美术</option>
+          <option value="信息技术">信息技术</option>
+          <option value="科学">科学</option>
+          <option value="道德与法治">道德与法治</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 分类一：教学实践类 -->
+    <div class="category-section">
+      <div class="category-title"><span class="icon">&#x1F4DA;</span> 教学实践类</div>
+      <div class="tag-list">
+        <div class="tag-item" data-category="教学实践类" data-tag="课堂教学提质需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">课堂教学提质需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在课堂教学提质方面的具体需求..."></textarea>
+          </div>
+        </div>
+        <div class="tag-item" data-category="教学实践类" data-tag="分层教学与因材施教需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">分层教学与因材施教需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在分层教学与因材施教方面的具体需求..."></textarea>
+          </div>
+        </div>
+        <div class="tag-item" data-category="教学实践类" data-tag="作业设计与减负增效需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">作业设计与减负增效需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在作业设计与减负增效方面的具体需求..."></textarea>
+          </div>
+        </div>
+        <div class="tag-item" data-category="教学实践类" data-tag="课堂互动与学情诊断需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">课堂互动与学情诊断需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在课堂互动与学情诊断方面的具体需求..."></textarea>
+          </div>
+        </div>
+        <div class="tag-item" data-category="教学实践类" data-tag="单元整体教学设计需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">单元整体教学设计需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在单元整体教学设计方面的具体需求..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分类二：课程建设类 -->
+    <div class="category-section">
+      <div class="category-title"><span class="icon">&#x1F4D0;</span> 课程建设类</div>
+      <div class="tag-list">
+        <div class="tag-item" data-category="课程建设类" data-tag="校本课程开发优化需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">校本课程开发优化需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在校本课程开发优化方面的具体需求..."></textarea>
+          </div>
+        </div>
+        <div class="tag-item" data-category="课程建设类" data-tag="学科课标深度研读需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">学科课标深度研读需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在学科课标深度研读方面的具体需求..."></textarea>
+          </div>
+        </div>
+        <div class="tag-item" data-category="课程建设类" data-tag="跨学科融合教学需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">跨学科融合教学需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在跨学科融合教学方面的具体需求..."></textarea>
+          </div>
+        </div>
+        <div class="tag-item" data-category="课程建设类" data-tag="特色课程体系搭建需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">特色课程体系搭建需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在特色课程体系搭建方面的具体需求..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分类三：教师专业成长类 -->
+    <div class="category-section">
+      <div class="category-title"><span class="icon">&#x1F331;</span> 教师专业成长类</div>
+      <div class="tag-list">
+        <div class="tag-item" data-category="教师专业成长类" data-tag="学科专业知识提升需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">学科专业知识提升需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在学科专业知识提升方面的具体需求..."></textarea>
+          </div>
+        </div>
+        <div class="tag-item" data-category="教师专业成长类" data-tag="教学技能实操培训需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">教学技能实操培训需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在教学技能实操培训方面的具体需求..."></textarea>
+          </div>
+        </div>
+        <div class="tag-item" data-category="教师专业成长类" data-tag="名师经验交流学习需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">名师经验交流学习需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在名师经验交流学习方面的具体需求..."></textarea>
+          </div>
+        </div>
+        <div class="tag-item" data-category="教师专业成长类" data-tag="青年教师师徒培养需求">
+          <label class="tag-label">
+            <input type="checkbox" class="tag-checkbox">
+            <span class="tag-text">青年教师师徒培养需求</span>
+          </label>
+          <div class="tag-desc">
+            <textarea placeholder="请描述您在青年教师师徒培养方面的具体需求..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 提交按钮 -->
+    <div class="btn-row">
+      <button class="btn-submit" id="btnSubmit" onclick="handleSubmit()">提 交 需 求</button>
+    </div>
+  </div>
+
+  <!-- 展示区域 -->
+  <div class="display-section">
+    <h2>需求展示</h2>
+    <div class="card-grid" id="cardGrid">
+      <div class="empty-state">
+        <span class="icon">&#x1F4CB;</span>
+        暂无教师提交需求，请在表单中填写并提交
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast 提示 -->
+<div class="toast" id="toast"></div>
+
+<!-- 删除确认弹窗 -->
+<div class="overlay" id="deleteOverlay">
+  <div class="dialog">
+    <p>确定要删除该教师的需求记录吗？<br>此操作不可恢复。</p>
+    <div class="dialog-btns">
+      <button class="btn-cancel" onclick="closeDeleteDialog()">取消</button>
+      <button class="btn-confirm" id="btnConfirmDelete">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   分学科教师需求填写系统 - 前端交互逻辑
+   功能：表单交互、复选框联动描述框、数据提交、卡片展示、删除
+   ============================================================ */
+
+/**
+ * 页面加载完成后初始化
+ * 1. 绑定所有复选框的 change 事件（勾选展开描述框）
+ * 2. 加载已有需求数据
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  // 绑定复选框事件
+  document.querySelectorAll(".tag-checkbox").forEach(function (cb) {
+    cb.addEventListener("change", function () {
+      var desc = this.closest(".tag-item").querySelector(".tag-desc");
+      desc.style.display = this.checked ? "block" : "none";
+    });
+  });
+
+  // 加载数据
+  loadNeeds();
+});
+
+/** Toast 提示 */
+function showToast(msg, type) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast " + type + " show";
+  clearTimeout(t._tid);
+  t._tid = setTimeout(function () { t.className = "toast"; }, 2500);
+}
+
+/**
+ * 收集表单中已勾选的需求项
+ * @returns {Array} 返回 [{ category, tag, description }] 格式的需求项数组
+ */
+function collectItems() {
+  var items = [];
+  document.querySelectorAll(".tag-item").forEach(function (item) {
+    var cb = item.querySelector(".tag-checkbox");
+    if (!cb.checked) return;
+    var desc = item.querySelector("textarea").value.trim();
+    if (!desc) return; // 勾选了但未填写描述，跳过
+    items.push({
+      category: item.dataset.category,
+      tag: item.dataset.tag,
+      description: desc
+    });
+  });
+  return items;
+}
+
+/**
+ * 提交需求
+ * 校验姓名、学科、至少一项需求，通过 POST /api/needs 提交
+ */
+async function handleSubmit() {
+  var nameEl = document.getElementById("teacherName");
+  var subjectEl = document.getElementById("teacherSubject");
+  var btn = document.getElementById("btnSubmit");
+
+  var name = nameEl.value.trim();
+  var subject = subjectEl.value;
+
+  if (!name) { showToast("请输入教师姓名", "error"); nameEl.focus(); return; }
+  if (!subject) { showToast("请选择所属学科", "error"); subjectEl.focus(); return; }
+
+  var items = collectItems();
+  if (items.length === 0) {
+    showToast("请至少勾选一项需求并填写描述", "error");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "提交中...";
+
+  try {
+    var resp = await fetch("/api/needs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name, subject: subject, items: items })
+    });
+    var data = await resp.json();
+    if (resp.ok) {
+      showToast("提交成功！", "success");
+      resetForm();
+      loadNeeds();
+    } else {
+      showToast(data.error || "提交失败", "error");
+    }
+  } catch (e) {
+    showToast("网络错误，请重试", "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "提 交 需 求";
+  }
+}
+
+/** 重置表单 */
+function resetForm() {
+  document.getElementById("teacherName").value = "";
+  document.getElementById("teacherSubject").value = "";
+  document.querySelectorAll(".tag-checkbox").forEach(function (cb) {
+    cb.checked = false;
+    cb.closest(".tag-item").querySelector(".tag-desc").style.display = "none";
+  });
+  document.querySelectorAll("textarea").forEach(function (ta) { ta.value = ""; });
+}
+
+/**
+ * 加载所有需求数据并渲染卡片
+ * GET /api/needs，按分类分组展示
+ */
+async function loadNeeds() {
+  var grid = document.getElementById("cardGrid");
+  try {
+    var resp = await fetch("/api/needs");
+    var data = await resp.json();
+
+    if (data.length === 0) {
+      grid.innerHTML = '<div class="empty-state"><span class="icon">&#x1F4CB;</span>暂无教师提交需求，请在表单中填写并提交</div>';
+      return;
+    }
+
+    grid.innerHTML = "";
+    data.forEach(function (submission) {
+      grid.appendChild(buildCard(submission));
+    });
+  } catch (e) {
+    grid.innerHTML = '<div class="empty-state"><span class="icon">&#x26A0;</span>加载失败，请刷新页面重试</div>';
+  }
+}
+
+/**
+ * 根据提交数据构建需求卡片 DOM
+ * @param {Object} sub - 单条提交数据 { id, name, subject, created_at, items }
+ * @returns {HTMLElement} 卡片 DOM 元素
+ */
+function buildCard(sub) {
+  var card = document.createElement("div");
+  card.className = "need-card";
+
+  // 卡片头部
+  var header = document.createElement("div");
+  header.className = "card-header";
+  header.innerHTML =
+    '<div class="teacher-info">' +
+      '<span class="name">' + escapeHtml(sub.name) + '</span>' +
+      '<span class="subject">' + escapeHtml(sub.subject) + '</span>' +
+      '<span class="time">' + escapeHtml(sub.created_at) + '</span>' +
+    '</div>' +
+    '<button class="btn-delete" onclick="confirmDelete(' + sub.id + ')">删除</button>';
+  card.appendChild(header);
+
+  // 卡片内容：按分类分组
+  var body = document.createElement("div");
+  body.className = "card-body";
+
+  var grouped = {};
+  sub.items.forEach(function (item) {
+    if (!grouped[item.category]) grouped[item.category] = [];
+    grouped[item.category].push(item);
+  });
+
+  for (var cat in grouped) {
+    var group = document.createElement("div");
+    group.className = "item-group";
+    group.innerHTML = '<div class="group-label">' + escapeHtml(cat) + '</div>';
+    grouped[cat].forEach(function (item) {
+      var entry = document.createElement("div");
+      entry.className = "item-entry";
+      entry.innerHTML =
+        '<div class="tag-name">' + escapeHtml(item.tag) + '</div>' +
+        '<div class="desc">' + escapeHtml(item.description) + '</div>';
+      group.appendChild(entry);
+    });
+    body.appendChild(group);
+  }
+
+  card.appendChild(body);
+  return card;
+}
+
+/** HTML 转义，防止 XSS */
+function escapeHtml(str) {
+  var div = document.createElement("div");
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+}
+
+/* ===== 删除逻辑 ===== */
+var pendingDeleteId = null;
+
+/** 弹出删除确认弹窗 */
+function confirmDelete(id) {
+  pendingDeleteId = id;
+  document.getElementById("deleteOverlay").classList.add("show");
+}
+
+/** 关闭删除弹窗 */
+function closeDeleteDialog() {
+  pendingDeleteId = null;
+  document.getElementById("deleteOverlay").classList.remove("show");
+}
+
+// 绑定确认删除按钮
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("btnConfirmDelete").addEventListener("click", async function () {
+    if (pendingDeleteId === null) return;
+    var id = pendingDeleteId;
+    closeDeleteDialog();
+    try {
+      var resp = await fetch("/api/needs/" + id, { method: "DELETE" });
+      if (resp.ok) {
+        showToast("删除成功", "success");
+        loadNeeds();
+      } else {
+        var data = await resp.json();
+        showToast(data.error || "删除失败", "error");
+      }
+    } catch (e) {
+      showToast("网络错误，请重试", "error");
+    }
+  });
+});
+</script>
+
+</body>
+</html>
